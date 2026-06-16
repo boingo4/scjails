@@ -268,6 +268,136 @@ footer a {
     gap: 8px;
 }
 
+.directory-controls {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+}
+
+.directory-controls input[type="text"] {
+    max-width: 520px;
+    box-sizing: border-box;
+}
+
+.sort-controls {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.sort-button {
+    background: white;
+    color: #003366;
+    border: 1px solid #b8c7d8;
+    border-radius: 8px;
+    padding: 11px 14px;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.sort-button.active,
+.sort-button:hover {
+    background: #003366;
+    color: white;
+}
+
+.directory-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.directory-heading h2,
+.directory-heading p {
+    margin: 0;
+}
+
+.directory-list {
+    display: grid;
+    gap: 16px;
+}
+
+.directory-card {
+    background: white;
+    border: 1px solid #d8d8d8;
+    border-radius: 8px;
+    padding: 18px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.directory-card-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(150px, 220px);
+    gap: 18px;
+    align-items: start;
+}
+
+.directory-card h3 {
+    margin: 0 0 6px;
+    color: #003366;
+}
+
+.directory-card p {
+    margin: 0;
+}
+
+.eyebrow,
+.directory-phone span,
+.directory-detail span {
+    display: block;
+    color: #5d6670;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.directory-phone {
+    background: #f4f7fa;
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.directory-details {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.directory-detail {
+    border-top: 1px solid #e5e5e5;
+    padding-top: 12px;
+}
+
+.directory-detail p {
+    margin-top: 4px;
+}
+
+.directory-links {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+}
+
+.directory-links a,
+.directory-links .muted {
+    background: #f4f7fa;
+    border: 1px solid #d8e1eb;
+    border-radius: 8px;
+    padding: 7px 10px;
+    font-weight: 700;
+}
+
+.directory-links .muted {
+    color: #5d6670;
+}
+
 #upcoming-meeting,
 #future-meetings {
     max-width: 760px;
@@ -300,6 +430,19 @@ footer a {
 
     .link-box {
         min-height: auto;
+    }
+
+    .directory-controls,
+    .directory-heading,
+    .directory-card-main,
+    .directory-details {
+        display: block;
+    }
+
+    .sort-controls,
+    .directory-phone,
+    .directory-detail {
+        margin-top: 12px;
     }
 
     table, thead, tbody, th, td, tr {

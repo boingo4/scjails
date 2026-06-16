@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Directory - Southern California Type 1 Jail Training Group</title>
     <meta name="description" content="Directory of Southern California police and sheriff facilities for jail managers, training officers, and Type 1 jail coordination."/>
-    <link href="styles.css?v=20260615-meetings" rel="stylesheet"/>
+    <link href="styles.css?v=20260615-directory" rel="stylesheet"/>
 </head>
 <body>
 <header>
@@ -31,23 +31,20 @@
         <h1>Directory</h1>
         <p>Explore our directory of police departments and sheriff's offices serving Southern California.</p>
     </section>
-    <input id="searchInput" onkeyup="searchTable()" placeholder="Search by facility or county..." type="text" />
-    <h2>Police Departments</h2>
-    <div class="responsive-table">
-        <table id="departments-table">
-            <thead>
-                <tr>
-                    <th data-sort="county" onclick="sortTable(0)">County</th>
-                    <th data-sort="facility" onclick="sortTable(1)">Facility</th>
-                    <th data-sort="address" onclick="sortTable(2)">Address</th>
-                    <th data-sort="stcmanager" onclick="sortTable(3)">STC Manager</th>
-                    <th data-sort="jailmanager" onclick="sortTable(4)">Jail Manager</th>
-                    <th data-sort="onlinePresence" onclick="sortTable(5)">Online Presence</th>
-                </tr>
-            </thead>
-            <tbody id="departments-body"></tbody>
-        </table>
-    </div>
+    <section class="directory-controls" aria-label="Directory controls">
+        <input id="searchInput" placeholder="Search facility, county, contact, email, or city..." type="text" />
+        <div class="sort-controls" aria-label="Sort directory">
+            <button class="sort-button active" data-sort="county" type="button">County</button>
+            <button class="sort-button" data-sort="facility" type="button">Facility</button>
+            <button class="sort-button" data-sort="jailManager" type="button">Jail Manager</button>
+            <button class="sort-button" data-sort="stcManager" type="button">STC Manager</button>
+        </div>
+    </section>
+    <section class="directory-heading">
+        <h2>Police Departments</h2>
+        <p id="directory-count" aria-live="polite"></p>
+    </section>
+    <div class="directory-list" id="departments-list" aria-live="polite"></div>
 </main>
 <footer>
     <p>© 2025 Southern California Type 1 Jail Training Group. All rights reserved.</p>
@@ -58,71 +55,123 @@
 </footer>
 <script src="scripts.js"></script>
 <script>
-        function searchTable() {
-            const input = document.getElementById('searchInput').value.toLowerCase();
-            const rows = document.querySelectorAll('#departments-table tbody tr');
-            rows.forEach(row => {
-                const county = row.children[0].textContent.toLowerCase();
-                const facility = row.children[1].textContent.toLowerCase();
-                row.style.display = county.includes(input) || facility.includes(input) ? '' : 'none';
-            });
+        let directoryRows = [];
+        let activeSort = 'county';
+
+        function cell(row, index) {
+            return row[index] ? row[index].trim() : '';
         }
 
-        let sortDirection = {};
-        function renderOnlinePresence(row) {
+        function directoryRecord(row) {
+            return {
+                county: cell(row, 0),
+                facility: cell(row, 1),
+                address: cell(row, 2),
+                phone: cell(row, 3),
+                website: cell(row, 4),
+                stcManager: cell(row, 5),
+                stcEmail: cell(row, 6),
+                stcPhone: cell(row, 7),
+                jailManager: cell(row, 8),
+                jailManagerEmail: cell(row, 9),
+                jailManagerPhone: cell(row, 10),
+                x: cell(row, 11),
+                instagram: cell(row, 12),
+                facebook: cell(row, 13)
+            };
+        }
+
+        function contactBlock(title, name, email, phone) {
+            const details = [
+                name ? `<strong>${escapeHTML(name)}</strong>` : '',
+                email ? `<a href="mailto:${escapeHTML(email)}">${escapeHTML(email)}</a>` : '',
+                phone ? `<a href="tel:${escapeHTML(phone.replace(/[^0-9+]/g, ''))}">${escapeHTML(phone)}</a>` : ''
+            ].filter(Boolean).join('<br>');
+
+            return `
+                <div class="directory-detail">
+                    <span>${escapeHTML(title)}</span>
+                    <p>${details || '<em>Not listed</em>'}</p>
+                </div>
+            `;
+        }
+
+        function linkButton(label, url) {
+            const safeUrl = safeHttpUrl(url);
+            return safeUrl ? `<a href="${escapeHTML(safeUrl)}" target="_blank" rel="noopener noreferrer">${escapeHTML(label)}</a>` : '';
+        }
+
+        function socialLinks(record) {
             const links = [
-                ['Website', row[4]],
-                ['Instagram', row[12]],
-                ['Facebook', row[13]]
-            ];
+                linkButton('Website', record.website),
+                linkButton('X', record.x),
+                linkButton('Instagram', record.instagram),
+                linkButton('Facebook', record.facebook)
+            ].filter(Boolean);
 
-            return links
-                .map(([label, url]) => {
-                    const safeUrl = safeHttpUrl(url);
-                    return safeUrl ? `<a href="${escapeHTML(safeUrl)}" target="_blank" rel="noopener noreferrer">${escapeHTML(label)}</a>` : '';
-                })
-                .filter(Boolean)
-                .join(' | ');
+            return links.length ? links.join('') : '<span class="muted">No links listed</span>';
         }
 
-        function sortTable(n) {
-            const table = document.getElementById('departments-table');
-            const tbody = table.querySelector('tbody');
-            const rows = Array.from(tbody.querySelectorAll('tr'));
-            const headers = table.querySelectorAll('th');
-            const sortKey = headers[n].getAttribute('data-sort');
-            const currentDirection = sortDirection[sortKey] || 'asc';
+        function phoneLink(value) {
+            const phone = value ? value.trim() : '';
+            return phone
+                ? `<a href="tel:${escapeHTML(phone.replace(/[^0-9+]/g, ''))}">${escapeHTML(phone)}</a>`
+                : '<span>Not listed</span>';
+        }
 
-            rows.sort((a, b) => {
-                let aValue = a.children[n].textContent.trim();
-                let bValue = b.children[n].textContent.trim();
-                if (aValue < bValue) return currentDirection === 'asc' ? -1 : 1;
-                if (aValue > bValue) return currentDirection === 'asc' ? 1 : -1;
-                return 0;
-            });
+        function renderDirectory() {
+            const list = document.getElementById('departments-list');
+            const count = document.getElementById('directory-count');
+            const query = document.getElementById('searchInput').value.trim().toLowerCase();
 
-            sortDirection[sortKey] = currentDirection === 'asc' ? 'desc' : 'asc';
-            rows.forEach(row => tbody.appendChild(row));
+            const records = directoryRows
+                .filter(record => !query || Object.values(record).join(' ').toLowerCase().includes(query))
+                .sort((a, b) => {
+                    const primary = (a[activeSort] || '').localeCompare(b[activeSort] || '');
+                    if (primary) return primary;
+                    return (a.facility || '').localeCompare(b.facility || '');
+                });
+
+            count.textContent = `${records.length} ${records.length === 1 ? 'facility' : 'facilities'}`;
+            list.innerHTML = records.map(record => `
+                <article class="directory-card">
+                    <div class="directory-card-main">
+                        <div>
+                            <p class="eyebrow">${escapeHTML(record.county || 'County not listed')}</p>
+                            <h3>${escapeHTML(record.facility || 'Facility not listed')}</h3>
+                            <p>${escapeHTML(record.address || 'Address not listed')}</p>
+                        </div>
+                        <div class="directory-phone">
+                            <span>Main Phone</span>
+                            ${phoneLink(record.phone)}
+                        </div>
+                    </div>
+                    <div class="directory-details">
+                        ${contactBlock('STC Manager', record.stcManager, record.stcEmail, record.stcPhone)}
+                        ${contactBlock('Jail Manager', record.jailManager, record.jailManagerEmail, record.jailManagerPhone)}
+                    </div>
+                    <div class="directory-links">${socialLinks(record)}</div>
+                </article>
+            `).join('');
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            const tbody = document.getElementById('departments-body');
+            document.getElementById('searchInput').addEventListener('input', renderDirectory);
+            document.querySelectorAll('.sort-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    activeSort = button.dataset.sort;
+                    document.querySelectorAll('.sort-button').forEach(item => item.classList.remove('active'));
+                    button.classList.add('active');
+                    renderDirectory();
+                });
+            });
+
             fetchSheetCSV('https://docs.google.com/spreadsheets/d/e/2PACX-1vSezEYhqpLaWeT3x1c7I4wzLBIlaRc1jB_d2ZIo-BUbHP8avKj_6e7-wSRJEM8Smm3AMz8JF1sR2uIv/pub?gid=1966191869&single=true&output=csv')
                 .then(csv => {
                     const lines = parseCSV(csv);
                     const rows = lines.slice(1).filter(row => row.some(cell => cell.trim()));
-                    rows.forEach(row => {
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
-                            <td data-label="County">${escapeHTML(row[0])}</td>
-                            <td data-label="Facility">${escapeHTML(row[1])}</td>
-                            <td data-label="Address">${escapeHTML(row[2])}</td>
-                            <td data-label="STC Manager">${escapeHTML(row[5])}</td>
-                            <td data-label="Jail Manager">${escapeHTML(row[8])}</td>
-                            <td data-label="Online Presence">${renderOnlinePresence(row)}</td>
-                        `;
-                        tbody.appendChild(tr);
-                    });
+                    directoryRows = rows.map(directoryRecord);
+                    renderDirectory();
                 })
                 .catch(error => console.error('Error loading directory data:', error));
         });
