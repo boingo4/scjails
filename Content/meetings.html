@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Meetings - Southern California Type 1 Jail Training Group</title>
     <meta name="description" content="Quarterly jail manager meeting schedules, locations, and participation details for Southern California."/>
-    <link href="styles.css?v=20260615-cards" rel="stylesheet"/>
+    <link href="styles.css?v=20260615-meetings" rel="stylesheet"/>
 </head>
 <body>
     <header>
@@ -34,11 +34,11 @@
         </section>
         <section id="upcoming-meeting">
             <h2>Upcoming Meeting</h2>
-            <p id="upcoming-details">Loading...</p>
+            <div id="upcoming-details" class="meeting-details">Loading...</div>
         </section>
         <section id="future-meetings">
             <h2>Future Meetings</h2>
-            <p id="future-details">Loading...</p>
+            <div id="future-details" class="meeting-details">Loading...</div>
         </section>
     </main>
 
@@ -67,12 +67,12 @@
                         return;
                     }
 
-                    const [date = 'TBD', location = 'TBD', address = 'TBD', time = 'TBD'] = rows[0];
+                    const [date = 'TBD', time = 'TBD', location = 'TBD', address = 'TBD'] = rows[0];
                     upcomingDetails.innerHTML = `\n                        <p>Location: ${escapeHTML(location)}</p>\n                        <p>Address: ${escapeHTML(address)}</p>\n                        <p>Date: ${escapeHTML(date)}</p>\n                        <p>Time: ${escapeHTML(time)}</p>\n                    `;
 
                     if (rows.length > 1) {
                         futureDetails.innerHTML = rows.slice(1).map(row => {
-                            const [fDate = 'TBD', fLocation = 'TBD', fAddress = 'TBD', fTime = 'TBD'] = row;
+                            const [fDate = 'TBD', fTime = 'TBD', fLocation = 'TBD', fAddress = 'TBD'] = row;
                             return `\n                                <p>Location: ${escapeHTML(fLocation)}</p>\n                                <p>Address: ${escapeHTML(fAddress)}</p>\n                                <p>Date: ${escapeHTML(fDate)}</p>\n                                <p>Time: ${escapeHTML(fTime)}</p>\n                                <hr>
                             `;
                         }).join('');
