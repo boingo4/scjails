@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Southern California Type 1 Jail Training Group</title>
+    <meta name="description" content="Type 1 jail training classes, meeting schedules, provider directory, and announcements for jail managers in Southern California.">
+    <link rel="canonical" href="https://www.scjails.com/">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <img src="images/2.png" alt="Southern California Jail Training Header Banner" class="header-banner">
+        <nav>
+            <div class="logo">SC Jails Training Group</div>
+            <button class="menu-toggle">Menu</button>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About Us</a></li>
+                <li><a href="courses.html">Training Courses</a></li>
+                <li><a href="meetings.html">Meetings</a></li>
+                <li><a href="directory.html">Directory</a></li>
+                <li><a href="providers.html">Providers</a></li>
+                <li><a href="updates.html">Updates</a></li>
+                <li><a href="links.html">Links</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section class="hero">
+            <h1>Southern California Type 1 Jail Training Group</h1>
+            <p>Supporting training and collaboration for Type 1 jails in Southern California.</p>
+        </section>
+        <section class="quick-links">
+            <div class="link-box">
+                <h3>Upcoming STC Courses</h3>
+                <p id="courses-summary">Loading...</p>
+                <a href="courses.html">View All</a>
+            </div>
+            <div class="link-box">
+                <h3>Next Quarterly Meeting</h3>
+                <p id="meeting-summary">Loading...</p>
+                <a href="meetings.html">View All</a>
+            </div>
+            <div class="link-box">
+                <h3>Latest Updates</h3>
+                <p id="updates-summary">Loading...</p>
+                <a href="updates.html">See All</a>
+            </div>
+        </section>
+        <section>
+            <h2>About Our Training Network</h2>
+            <p>SC Jails Training Group coordinates STC-certified Type 1 jail training, regional provider resources, and quarterly jail manager meetings for Southern California. Members use this site to find course calendars, approved providers, facility directories, legal links, and real-time updates for correctional training requirements in this region.</p>
+            <p>Whether you are a jail manager, training officer, or corrections provider in Southern California, this site helps keep your team compliant and connected with the latest local Type 1 jail training information.</p>
+        </section>
+    </main>
+    <footer>
+        <p>© 2025 Southern California Type 1 Jail Training Group. All rights reserved.</p>
+        <ul>
+            <li><a href="contact.html">Contact Us</a></li>
+            <li><a href="https://groups.google.com/g/scjails" target="_blank" rel="noopener noreferrer">Join Email List</a></li>
+        </ul>
+    </footer>
+    <script src="scripts.js"></script>
+    <script>
+        const coursesSheet = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSezEYhqpLaWeT3x1c7I4wzLBIlaRc1jB_d2ZIo-BUbHP8avKj_6e7-wSRJEM8Smm3AMz8JF1sR2uIv/pub?gid=0&single=true&output=csv';
+        const meetingsSheet = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSezEYhqpLaWeT3x1c7I4wzLBIlaRc1jB_d2ZIo-BUbHP8avKj_6e7-wSRJEM8Smm3AMz8JF1sR2uIv/pub?gid=1075192775&single=true&output=csv';
+        const updatesSheet = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSezEYhqpLaWeT3x1c7I4wzLBIlaRc1jB_d2ZIo-BUbHP8avKj_6e7-wSRJEM8Smm3AMz8JF1sR2uIv/pub?gid=1098508545&single=true&output=csv';
+
+        const monthNames = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+
+        function parseMonthYear(text) {
+            if (!text) return null;
+            const match = text.match(/([A-Za-z]+)\s+(\d{1,2})(?:\D+(\d{4}))?/);
+            if (!match) return null;
+            const month = match[1].toLowerCase();
+            const year = match[3] ? parseInt(match[3], 10) : new Date().getFullYear();
+            const monthIndex = monthNames.findIndex(m => m.toLowerCase().startsWith(month));
+            if (monthIndex === -1) return null;
+            return { year, monthIndex };
+        }
+
+        function renderCourseSummary() {
+            fetchSheetCSV(coursesSheet)
+                .then(csv => {
+                    const rows = parseCSV(csv).slice(1).filter(row => row.some(cell => cell.trim()));
+                    if (rows.length === 0) {
+                        document.getElementById('courses-summary').textContent = 'No upcoming courses';
+                        return;
+                    }
+
+                    const months = rows.map(row => parseMonthYear(row[0])).filter(Boolean);
+                    if (months.length === 0) {
+                        document.getElementById('courses-summary').textContent = `View ${rows.length} courses`;
+                        return;
+                    }
+
+                    let earliest = { year: 9999, monthIndex: 11 };
+                    let latest = { year: 0, monthIndex: 0 };
+
+                    months.forEach(item => {
+                        if (item.year < earliest.year || (item.year === earliest.year && item.monthIndex < earliest.monthIndex)) {
+                            earliest = item;
+                        }
+                        if (item.year > latest.year || (item.year === latest.year && item.monthIndex > latest.monthIndex)) {
+                            latest = item;
+                        }
+                    });
+
+                    const range = earliest.year === latest.year && earliest.monthIndex === latest.monthIndex
+                        ? `${monthNames[earliest.monthIndex]} ${earliest.year}`
+                        : `${monthNames[earliest.monthIndex]} ${earliest.year} – ${monthNames[latest.monthIndex]} ${latest.year}`;
+
+                    document.getElementById('courses-summary').textContent = `View ${rows.length} classes in ${range}`;
+                })
+                .catch(() => {
+                    document.getElementById('courses-summary').textContent = 'View courses';
+                });
+        }
+
+        function renderMeetingSummary() {
+            fetchSheetCSV(meetingsSheet)
+                .then(csv => {
+                    const rows = parseCSV(csv).slice(1).filter(row => row.some(cell => cell.trim()));
+                    if (rows.length === 0) {
+                        document.getElementById('meeting-summary').textContent = 'Date: TBD\nLocation: TBD\nDetails: TBD';
+                        return;
+                    }
+                    const [date = 'TBD', location = 'TBD', details = 'TBD'] = rows[0];
+                    document.getElementById('meeting-summary').textContent = `Date: ${date}\nLocation: ${location}\nDetails: ${details}`;
+                })
+                .catch(() => {
+                    document.getElementById('meeting-summary').textContent = 'Date: TBD\nLocation: TBD\nDetails: TBD';
+                });
+        }
+
+        function renderUpdatesSummary() {
+            fetchSheetCSV(updatesSheet)
+                .then(csv => {
+                    const rows = parseCSV(csv).slice(1).filter(row => row.some(cell => cell.trim()));
+                    if (rows.length === 0) {
+                        document.getElementById('updates-summary').textContent = 'No updates available.';
+                        return;
+                    }
+                    const [date = '', description = 'No updates available.'] = rows[0];
+                    document.getElementById('updates-summary').textContent = date ? `${date}: ${description}` : description;
+                })
+                .catch(() => {
+                    document.getElementById('updates-summary').textContent = 'No updates available.';
+                });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCourseSummary();
+            renderMeetingSummary();
+            renderUpdatesSummary();
+        });
+    </script>
+</body>
+</html>

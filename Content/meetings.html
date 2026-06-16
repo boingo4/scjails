@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Meetings - Southern California Type 1 Jail Training Group</title>
+    <meta name="description" content="Quarterly jail manager meeting schedules, locations, and participation details for Southern California."/>
+    <link href="styles.css" rel="stylesheet"/>
+</head>
+<body>
+    <header>
+        <img alt="Southern California Jail Training Header Banner" class="header-banner" src="images/4.png"/>
+        <nav>
+            <div class="logo">SC Jails Training Group</div>
+            <button class="menu-toggle">Menu</button>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About Us</a></li>
+                <li><a href="courses.html">Training Courses</a></li>
+                <li><a href="meetings.html">Meetings</a></li>
+                <li><a href="directory.html">Directory</a></li>
+                <li><a href="providers.html">Providers</a></li>
+                <li><a href="updates.html">Updates</a></li>
+                <li><a href="links.html">Links</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <h1>Quarterly Jail Managers' Meetings</h1>
+            <p>Join us for discussions on Southern California training, operations, and best practices.</p>
+        </section>
+        <section id="upcoming-meeting">
+            <h2>Upcoming Meeting</h2>
+            <p id="upcoming-details">Loading...</p>
+        </section>
+        <section id="future-meetings">
+            <h2>Future Meetings</h2>
+            <p id="future-details">Loading...</p>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2025 Southern California Type 1 Jail Training Group. All rights reserved.</p>
+        <ul>
+            <li><a href="contact.html">Contact Us</a></li>
+            <li><a href="https://groups.google.com/g/scjails" target="_blank" rel="noopener noreferrer">Join Email List</a></li>
+        </ul>
+    </footer>
+
+    <script src="scripts.js"></script>
+    <script>
+        const meetingsSheet = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSezEYhqpLaWeT3x1c7I4wzLBIlaRc1jB_d2ZIo-BUbHP8avKj_6e7-wSRJEM8Smm3AMz8JF1sR2uIv/pub?gid=1075192775&single=true&output=csv';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const upcomingDetails = document.getElementById('upcoming-details');
+            const futureDetails = document.getElementById('future-details');
+
+            fetchSheetCSV(meetingsSheet)
+                .then(csv => {
+                    const rows = parseCSV(csv).slice(1).filter(row => row.some(cell => cell.trim()));
+                    if (rows.length === 0) {
+                        upcomingDetails.textContent = 'No upcoming meeting scheduled.';
+                        futureDetails.textContent = 'TBD';
+                        return;
+                    }
+
+                    const [date = 'TBD', location = 'TBD', address = 'TBD', time = 'TBD'] = rows[0];
+                    upcomingDetails.innerHTML = `\n                        <p>Location: ${escapeHTML(location)}</p>\n                        <p>Address: ${escapeHTML(address)}</p>\n                        <p>Date: ${escapeHTML(date)}</p>\n                        <p>Time: ${escapeHTML(time)}</p>\n                    `;
+
+                    if (rows.length > 1) {
+                        futureDetails.innerHTML = rows.slice(1).map(row => {
+                            const [fDate = 'TBD', fLocation = 'TBD', fAddress = 'TBD', fTime = 'TBD'] = row;
+                            return `\n                                <p>Location: ${escapeHTML(fLocation)}</p>\n                                <p>Address: ${escapeHTML(fAddress)}</p>\n                                <p>Date: ${escapeHTML(fDate)}</p>\n                                <p>Time: ${escapeHTML(fTime)}</p>\n                                <hr>
+                            `;
+                        }).join('');
+                    } else {
+                        futureDetails.textContent = 'TBD';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading meeting data:', error);
+                    upcomingDetails.textContent = 'No upcoming meeting scheduled.';
+                    futureDetails.textContent = 'TBD';
+                });
+        });
+    </script>
+</body>
+</html>

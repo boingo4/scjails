@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Training Courses - Southern California Type 1 Jail Training Group</title>
+    <meta name="description" content="Upcoming STC-certified Type 1 jail training courses, calendar listings, and provider schedules for Southern California.">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+    <header>
+        <img src="images/6.png" alt="Southern California Jail Training Header Banner" class="header-banner">
+        <nav>
+            <div class="logo">SC Jails Training Group</div>
+            <button class="menu-toggle">Menu</button>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About Us</a></li>
+                <li><a href="courses.html">Training Courses</a></li>
+                <li><a href="meetings.html">Meetings</a></li>
+                <li><a href="directory.html">Directory</a></li>
+                <li><a href="providers.html">Providers</a></li>
+                <li><a href="updates.html">Updates</a></li>
+                <li><a href="links.html">Links</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <h1>Training Courses</h1>
+            <p>View STC-certified training courses provided by various organizations in Southern California, added to our calendar based on provider notifications.</p>
+        </section>
+        <div id="course-buttons" style="text-align: center; margin: 20px 0;">
+            <button class="cta" onclick="downloadAsPDF()">Download as PDF</button>
+        </div>
+        <div class="responsive-table">
+            <table id="course-table">
+                <thead>
+                    <tr>
+                        <th onclick="sortTable(0)" data-sort="date">Date</th>
+                        <th onclick="sortTable(1)" data-sort="location">Location</th>
+                        <th onclick="sortTable(2)" data-sort="course title">Course Title</th>
+                        <th onclick="sortTable(3)" data-sort="hours">Hours</th>
+                        <th onclick="sortTable(4)" data-sort="cost">Cost</th>
+                        <th onclick="sortTable(5)" data-sort="contact">Contact</th>
+                    </tr>
+                </thead>
+                <tbody id="course-body"></tbody>
+            </table>
+        </div>
+        <h2>Additional STC Calendars</h2>
+        <p>Additional STC calendars may be found at the following locations:</p>
+        <ul>
+            <li><a href="https://lahidtatraining.org/default.aspx?act=EventBuilderViewList.aspx&tag=STC+Certified&listtype=public&category=&menuitemid=1&MenuGroup=Training+Home" target="_blank" rel="noopener noreferrer">LA HIDTA STC Training</a></li>
+            <li><a href="https://www.regionaltrainingprogram.org/index.php/home/corrections/corrections-courses#" target="_blank" rel="noopener noreferrer">Riverside County Sheriff Regional Training Program</a></li>
+        </ul>
+    </main>
+
+    <footer>
+        <p>© 2025 Southern California Type 1 Jail Training Group. All rights reserved.</p>
+        <ul>
+            <li><a href="contact.html">Contact Us</a></li>
+            <li><a href="https://groups.google.com/g/scjails" target="_blank" rel="noopener noreferrer">Join Email List</a></li>
+        </ul>
+    </footer>
+
+    <script src="scripts.js"></script>
+    <script>
+        function parseDate(dateStr) {
+            if (!dateStr || !dateStr.trim()) return new Date(0);
+            const months = {
+                january: 0, february: 1, march: 2, april: 3, may: 4, june: 5,
+                july: 6, august: 7, september: 8, october: 9, november: 10, december: 11
+            };
+
+            const rangeMatch = dateStr.match(/([A-Za-z]+)\s+(\d{1,2})(?:-(\d{1,2}))?(?:,\s*(\d{4}))?/i);
+            if (rangeMatch) {
+                const month = months[rangeMatch[1].toLowerCase()];
+                const day = parseInt(rangeMatch[2], 10);
+                const year = rangeMatch[4] ? parseInt(rangeMatch[4], 10) : new Date().getFullYear();
+                if (month !== undefined && day) {
+                    return new Date(year, month, day);
+                }
+            }
+            return new Date(0);
+        }
+
+        let sortDirection = {};
+
+        function sortTable(n) {
+            const table = document.getElementById('course-table');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            const headers = table.querySelectorAll('th');
+            const sortKey = headers[n].getAttribute('data-sort');
+            const currentDirection = sortDirection[sortKey] || 'asc';
+
+            rows.sort((a, b) => {
+                let aValue = a.children[n].textContent.trim();
+                let bValue = b.children[n].textContent.trim();
+
+                if (sortKey === 'date') {
+                    aValue = parseDate(aValue);
+                    bValue = parseDate(bValue);
+                } else if (sortKey === 'hours' || sortKey === 'cost') {
+                    aValue = parseFloat(aValue.replace(/[^0-9.-]+/g, '')) || 0;
+                    bValue = parseFloat(bValue.replace(/[^0-9.-]+/g, '')) || 0;
+                }
+
+                if (aValue < bValue) return currentDirection === 'asc' ? -1 : 1;
+                if (aValue > bValue) return currentDirection === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            sortDirection[sortKey] = currentDirection === 'asc' ? 'desc' : 'asc';
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+        function downloadAsPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const tableData = [];
+            const headers = ['Date', 'Location', 'Course Title', 'Hours', 'Cost', 'Contact'];
+
+            fetchSheetCSV('https://docs.google.com/spreadsheets/d/e/2PACX-1vSezEYhqpLaWeT3x1c7I4wzLBIlaRc1jB_d2ZIo-BUbHP8avKj_6e7-wSRJEM8Smm3AMz8JF1sR2uIv/pub?gid=0&single=true&output=csv')
+                .then(csv => {
+                    const lines = parseCSV(csv).slice(1);
+                    lines.forEach(row => {
+                        tableData.push([
+                            row[0] || '',
+                            row[1] || '',
+                            row[2] || '',
+                            row[3] || '',
+                            row[4] || '',
+                            row[5] || ''
+                        ]);
+                    });
+
+                    doc.autoTable({
+                        head: [headers],
+                        body: tableData,
+                        startY: 20,
+                        margin: { top: 20 },
+                        styles: { fontSize: 9, cellPadding: 2 },
+                        headStyles: { fillColor: [255, 102, 0] }
+                    });
+                    doc.save('scjails_courses.pdf');
+                })
+                .catch(error => console.error('Error downloading PDF:', error));
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const tbody = document.getElementById('course-body');
+            if (!tbody) return;
+
+            fetchSheetCSV('https://docs.google.com/spreadsheets/d/e/2PACX-1vSezEYhqpLaWeT3x1c7I4wzLBIlaRc1jB_d2ZIo-BUbHP8avKj_6e7-wSRJEM8Smm3AMz8JF1sR2uIv/pub?gid=0&single=true&output=csv')
+                .then(csv => {
+                    const lines = parseCSV(csv);
+                    if (lines.length < 2) return;
+                    const headers = lines[0].map(h => h.toLowerCase().trim());
+                    const rows = lines.slice(1).filter(row => row.some(cell => cell.trim()));
+
+                    rows.forEach(row => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td data-label="Date">${escapeHTML(row[0])}</td>
+                            <td data-label="Location">${escapeHTML(row[1])}</td>
+                            <td data-label="Course Title">${escapeHTML(row[2])}</td>
+                            <td data-label="Hours">${escapeHTML(row[3])}</td>
+                            <td data-label="Cost">${escapeHTML(row[4])}</td>
+                            <td data-label="Contact">${escapeHTML(row[5])}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                })
+                .catch(error => console.error('Error loading course data:', error));
+        });
+    </script>
+</body>
+</html>

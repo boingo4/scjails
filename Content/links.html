@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Links - Southern California Type 1 Jail Training Group</title>
+    <meta name="description" content="Useful resources for Type 1 jail managers, training officers, and Southern California corrections staff."/>
+    <link href="styles.css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+    <img alt="Southern California Jail Training Header Banner" class="header-banner" src="images/6.png"/>
+    <nav>
+        <div class="logo">SC Jails Training Group</div>
+        <button class="menu-toggle">Menu</button>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="courses.html">Training Courses</a></li>
+            <li><a href="meetings.html">Meetings</a></li>
+            <li><a href="directory.html">Directory</a></li>
+            <li><a href="providers.html">Providers</a></li>
+            <li><a href="updates.html">Updates</a></li>
+            <li><a href="links.html">Links</a></li>
+            <li><a href="contact.html">Contact</a></li>
+        </ul>
+    </nav>
+</header>
+<main class="container">
+    <section class="hero">
+        <h1>Links to Southern California Jail Training Resources</h1>
+        <p>Explore useful Southern California resources related to Type I jails, training, and corrections guidance.</p>
+    </section>
+    <div class="links-table responsive-table">
+        <table id="links-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>URL</th>
+                </tr>
+            </thead>
+            <tbody id="links-body"></tbody>
+        </table>
+    </div>
+</main>
+<footer>
+    <p>© 2025 Southern California Type 1 Jail Training Group. All rights reserved.</p>
+    <ul>
+        <li><a href="contact.html">Contact Us</a></li>
+        <li><a href="https://groups.google.com/g/scjails" target="_blank" rel="noopener noreferrer">Join Email List</a></li>
+    </ul>
+</footer>
+<script src="scripts.js"></script>
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tbody = document.getElementById('links-body');
+            fetchSheetCSV('https://docs.google.com/spreadsheets/d/e/2PACX-1vSezEYhqpLaWeT3x1c7I4wzLBIlaRc1jB_d2ZIo-BUbHP8avKj_6e7-wSRJEM8Smm3AMz8JF1sR2uIv/pub?gid=1623982330&single=true&output=csv')
+                .then(csv => {
+                    const rows = parseCSV(csv).slice(1).filter(row => row.some(cell => cell.trim()));
+                    if (rows.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="2">No links available.</td></tr>';
+                        return;
+                    }
+                    rows.forEach(row => {
+                        const tr = document.createElement('tr');
+                        const name = row[0] || '';
+                        const url = row[1] || '';
+                        const safeUrl = safeHttpUrl(url);
+                        tr.innerHTML = `
+                            <td data-label="Name">${escapeHTML(name)}</td>
+                            <td data-label="URL">${safeUrl ? `<a href="${escapeHTML(safeUrl)}" target="_blank" rel="noopener noreferrer">${escapeHTML(url)}</a>` : escapeHTML(url)}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading links data:', error);
+                    document.getElementById('links-body').innerHTML = '<tr><td colspan="2">Unable to load links.</td></tr>';
+                });
+        });
+    </script>
+</body>
+</html>

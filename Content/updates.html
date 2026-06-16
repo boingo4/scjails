@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Updates - Southern California Type 1 Jail Training Group</title>
+    <meta name="description" content="Latest announcements and operational updates for Southern California Type 1 Jail Training Group members and jail managers."/>
+    <link href="styles.css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+    <img alt="Southern California Jail Training Header Banner" class="header-banner" src="images/5.png"/>
+    <nav>
+        <div class="logo">SC Jails Training Group</div>
+        <button class="menu-toggle">Menu</button>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="courses.html">Training Courses</a></li>
+            <li><a href="meetings.html">Meetings</a></li>
+            <li><a href="directory.html">Directory</a></li>
+            <li><a href="providers.html">Providers</a></li>
+            <li><a href="updates.html">Updates</a></li>
+            <li><a href="links.html">Links</a></li>
+            <li><a href="contact.html">Contact</a></li>
+        </ul>
+    </nav>
+</header>
+<main>
+    <section class="hero">
+        <h1>Updates</h1>
+        <p>Stay up-to-date with the latest news and announcements for the Southern California Type 1 Jail Training Group.</p>
+    </section>
+    <div id="update-list" class="container">
+        <ul id="update-body"></ul>
+    </div>
+</main>
+<footer>
+    <p>© 2025 Southern California Type 1 Jail Training Group. All rights reserved.</p>
+    <ul>
+        <li><a href="contact.html">Contact Us</a></li>
+        <li><a href="https://groups.google.com/g/scjails" target="_blank" rel="noopener noreferrer">Join Email List</a></li>
+    </ul>
+</footer>
+<script src="scripts.js"></script>
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const ul = document.getElementById('update-body');
+            fetchSheetCSV('https://docs.google.com/spreadsheets/d/e/2PACX-1vSezEYhqpLaWeT3x1c7I4wzLBIlaRc1jB_d2ZIo-BUbHP8avKj_6e7-wSRJEM8Smm3AMz8JF1sR2uIv/pub?gid=1098508545&single=true&output=csv')
+                .then(csv => {
+                    const rows = parseCSV(csv).slice(1).filter(row => row.some(cell => cell.trim()));
+                    if (rows.length === 0) {
+                        ul.innerHTML = '<li>No updates available.</li>';
+                        return;
+                    }
+                    rows.forEach(row => {
+                        const date = row[0] || '';
+                        const description = row[1] || '';
+                        const li = document.createElement('li');
+                        li.innerHTML = `<strong>${escapeHTML(date)}</strong>: ${escapeHTML(description)}`;
+                        ul.appendChild(li);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading updates data:', error);
+                    ul.innerHTML = '<li>Unable to load updates.</li>';
+                });
+        });
+    </script>
+</body>
+</html>
