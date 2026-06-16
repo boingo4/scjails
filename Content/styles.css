@@ -332,9 +332,36 @@ footer a {
 
 .directory-card-main {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(150px, 220px);
+    grid-template-columns: 92px minmax(0, 1fr) minmax(150px, 220px);
     gap: 18px;
     align-items: start;
+}
+
+.directory-patch {
+    width: 92px;
+    height: 92px;
+    display: grid;
+    place-items: center;
+    background: #f4f7fa;
+    border: 1px solid #d8e1eb;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.directory-patch img {
+    max-width: 82px;
+    max-height: 82px;
+    object-fit: contain;
+}
+
+.directory-patch span {
+    display: none;
+    color: #003366;
+    font-weight: 700;
+}
+
+.directory-patch.missing span {
+    display: block;
 }
 
 .directory-card h3 {
@@ -440,9 +467,20 @@ footer a {
     }
 
     .sort-controls,
+    .directory-patch,
     .directory-phone,
     .directory-detail {
         margin-top: 12px;
+    }
+
+    .directory-patch {
+        width: 76px;
+        height: 76px;
+    }
+
+    .directory-patch img {
+        max-width: 68px;
+        max-height: 68px;
     }
 
     table, thead, tbody, th, td, tr {

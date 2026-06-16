@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Directory - Southern California Type 1 Jail Training Group</title>
     <meta name="description" content="Directory of Southern California police and sheriff facilities for jail managers, training officers, and Type 1 jail coordination."/>
-    <link href="styles.css?v=20260615-directory" rel="stylesheet"/>
+    <link href="styles.css?v=20260615-directory-patches" rel="stylesheet"/>
 </head>
 <body>
 <header>
@@ -119,6 +119,34 @@
                 : '<span>Not listed</span>';
         }
 
+        function patchSlug(facility) {
+            return facility
+                .toLowerCase()
+                .replace(/&/g, 'and')
+                .replace(/[^a-z0-9]+/g, '_')
+                .replace(/^_+|_+$/g, '');
+        }
+
+        function agencyInitials(facility) {
+            return facility
+                .split(/\s+/)
+                .filter(word => !['and', 'county', 'department', 'police', 'sheriff', 's'].includes(word.toLowerCase()))
+                .slice(0, 3)
+                .map(word => word[0])
+                .join('')
+                .toUpperCase() || 'SC';
+        }
+
+        function patchImage(record) {
+            const src = `patches/${patchSlug(record.facility)}.png`;
+            return `
+                <div class="directory-patch" aria-hidden="true">
+                    <img src="${escapeHTML(src)}" alt="" loading="lazy" onerror="this.parentElement.classList.add('missing'); this.remove();">
+                    <span>${escapeHTML(agencyInitials(record.facility))}</span>
+                </div>
+            `;
+        }
+
         function renderDirectory() {
             const list = document.getElementById('departments-list');
             const count = document.getElementById('directory-count');
@@ -136,6 +164,7 @@
             list.innerHTML = records.map(record => `
                 <article class="directory-card">
                     <div class="directory-card-main">
+                        ${patchImage(record)}
                         <div>
                             <p class="eyebrow">${escapeHTML(record.county || 'County not listed')}</p>
                             <h3>${escapeHTML(record.facility || 'Facility not listed')}</h3>
