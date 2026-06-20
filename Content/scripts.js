@@ -80,6 +80,15 @@ function extractDomain(url) {
     }
 }
 
+function providerAnchor(value) {
+    return String(value ?? '')
+        .trim()
+        .toLowerCase()
+        .replace(/&/g, ' and ')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+}
+
 function initMobileNav() {
     const navList = document.querySelector('nav ul');
     const toggle = document.querySelector('.menu-toggle');

@@ -168,6 +168,12 @@ tbody tr:nth-child(even) {
     background: #fafafa;
 }
 
+tbody tr.linked-provider {
+    background: #fff3d6;
+    outline: 3px solid #ffb347;
+    outline-offset: -3px;
+}
+
 input[type="text"], input[type="email"], textarea {
     width: 100%;
     max-width: 520px;

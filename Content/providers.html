@@ -99,9 +99,18 @@
                     rows.forEach(row => {
                         const provider = row[0] || '';
                         const tr = document.createElement('tr');
+                        const anchor = providerAnchor(provider);
+                        const contactAnchor = providerAnchor(row[4]);
                         const website = safeHttpUrl(row[3]);
                         const phone = row[2] || '';
                         const email = row[5] || '';
+                        if (anchor) {
+                            tr.id = anchor;
+                            tr.dataset.providerAnchor = anchor;
+                        }
+                        if (contactAnchor) {
+                            tr.dataset.contactAnchor = contactAnchor;
+                        }
                         tr.innerHTML = `
                             <td data-label="Provider">${escapeHTML(provider)}</td>
                             <td data-label="Address">${escapeHTML(row[1])}</td>
@@ -112,9 +121,36 @@
                         `;
                         tbody.appendChild(tr);
                     });
+                    highlightProviderFromHash();
                 })
                 .catch(error => console.error('Error loading providers data:', error));
         });
+
+        function highlightProviderFromHash() {
+            let anchor = window.location.hash.slice(1);
+            if (!anchor) return;
+            try {
+                anchor = decodeURIComponent(anchor);
+            } catch {
+                // Keep the raw hash if it is not valid URI encoding.
+            }
+            anchor = providerAnchor(anchor);
+            if (!anchor) return;
+
+            const rows = Array.from(document.querySelectorAll('#providers-table tbody tr'));
+            const row = document.getElementById(anchor) || rows.find(providerRow =>
+                providerRow.dataset.providerAnchor === anchor || providerRow.dataset.contactAnchor === anchor
+            );
+            if (!row) return;
+
+            rows.forEach(providerRow => {
+                providerRow.classList.remove('linked-provider');
+            });
+            row.classList.add('linked-provider');
+            row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        window.addEventListener('hashchange', highlightProviderFromHash);
     </script>
 </body>
 </html>

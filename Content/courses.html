@@ -153,6 +153,14 @@
                 .catch(error => console.error('Error downloading PDF:', error));
         }
 
+        function providerLink(value) {
+            const contact = String(value ?? '').trim();
+            const anchor = providerAnchor(contact);
+            return anchor
+                ? `<a href="providers.html#${encodeURIComponent(anchor)}">${escapeHTML(contact)}</a>`
+                : escapeHTML(contact);
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const tbody = document.getElementById('course-body');
             if (!tbody) return;
@@ -172,7 +180,7 @@
                             <td data-label="Course Title">${escapeHTML(row[2])}</td>
                             <td data-label="Hours">${escapeHTML(row[3])}</td>
                             <td data-label="Cost">${escapeHTML(row[4])}</td>
-                            <td data-label="Contact">${escapeHTML(row[5])}</td>
+                            <td data-label="Contact">${providerLink(row[5])}</td>
                         `;
                         tbody.appendChild(tr);
                     });
