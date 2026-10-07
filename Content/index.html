@@ -75,7 +75,7 @@
 
         function parseMonthYear(text) {
             if (!text) return null;
-            const match = text.match(/([A-Za-z]+)\s+(\d{1,2})(?:\D+(\d{4}))?/);
+            const match = text.match(/([A-Za-z]+)\s+(\d{1,2})(?:\s*[-–—]\s*\d{1,2})?(?:\s*,?\s*(\d{4}))?\s*$/);
             if (!match) return null;
             const month = match[1].toLowerCase();
             const year = match[3] ? parseInt(match[3], 10) : new Date().getFullYear();
